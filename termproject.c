@@ -62,7 +62,7 @@ void n_list_test_insert(void)
     initialize_ts64(spclock);
     strut list_head HEAD;
     int i;
-    for (i=0; i<100000; i++)
+    for (i=0; i<NUM_OF_ENTRY; i++)
     {
         struct node *new = kmalloc(sizeof(struct node), GFP_KERNEL);
         new->value = i+2000;
@@ -81,14 +81,14 @@ void n_list_test_delete(void)
     initialize_ts64(spclock);
     struct list_head HEAD;
     int i;
-    for (i=0; i<100000; i++)
+    for (i=0; i<NUM_OF_ENTRY; i++)
     {
         struct node *new = kmalloc(sizeof(struct node), GFP_KERNEL);
         new->value = i+2000;
         n_list_add(&new->v_list, &HEAD);
     }
     
-    struct list_head* to_del = n_list_get(99999, &HEAD);
+    struct list_head* to_del = n_list_get(NUM_OF_ENTRY-1, &HEAD);
     
     ktime_get_real_ts64(&spclock[0]);
     n_list_del(to_del, &HEAD);
@@ -100,14 +100,14 @@ void n_list_test_get(void)
     initialize_ts64(spclock);
     struct list_head HEAD;
     int i;
-    for (i=0; i<100000; i++)
+    for (i=0; i<NUM_OF_ENTRY; i++)
     {
         struct node *new = kmalloc(sizeof(struct node), GFP_KERNEL);
         new->value = i+2000;
         n_list_add(&new->v_list, &HEAD);
     }
     
-    for (i=0; i<100000; i++)
+    for (i=0; i<NUM_OF_ENTRY; i++)
     {
         unsigned long long __time = 0;
         unsigned long long __count = 0;
@@ -117,24 +117,41 @@ void n_list_test_get(void)
         calclock3(spclock, &__time, &__count);
         n_list_delete_time += __time;
     }
-    n_list_get_time = (unsigned long long) (n_list_get_time/100000);
+    n_list_get_time = (unsigned long long) (n_list_get_time/NUM_OF_ENTRY);
 }
 
 void n_list_test_traverse(void)
 {
+    initialize_ts64(spclock);
+    struct list_head HEAD;
+    int i;
+    for (i=0; i<NUM_OF_ENTRY; i++)
+    {
+        struct node *new = kmalloc(sizeof(struct node), GFP_KERNEL);
+        new->value = i+2000;
+        n_list_add(&new->v_list, &HEAD);
+    }
+    
     
 }
 
 int __init simple_module_init(void)
 {
     printk(KERN_EMERG "n_list testing Module\n");
-    run();
+    n_list_test_insert();
+    n_list_test_delete();
+    n_list_test_get();
+    n_list_test_traverse();
     return 0;
 }
 
 void __exit simple_module_cleanup(void)
 {
-    printk("n_list testing Module\n");
+    printk("n_list testing Done\n");
+    printk("n_list insert time : %llu\n", n_list_insert_time);
+    printk("n_list delete time : %llu\n", n_list_delete_time);
+    printk("n_list get time : %llu\n", n_list_get_time);
+    printk("n_list traverse time : %llu\n", n_list_traverse_time);
 }
 
 module_init(simple_module_init);
