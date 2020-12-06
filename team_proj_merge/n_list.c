@@ -1,5 +1,5 @@
 #define SUB_LENGTH 10
-#define NUM_OF_ENTRY 100
+#define NUM_OF_ENTRY 1000
 
 #include <linux/kernel.h>
 #include <linux/module.h>

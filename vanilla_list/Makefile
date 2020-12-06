@@ -13,7 +13,4 @@ PWD := $(shell pwd)
 default:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
 clean:
-	rm *.mod.*
-	rm *.ko
-	rm *.o
-
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean

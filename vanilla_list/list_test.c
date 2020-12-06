@@ -67,13 +67,13 @@ unsigned long long calclock3(struct timespec64 *spclock, unsigned long long *tot
 
 struct list_head* list_get(int index, struct list_head* head)
 {
-   struct list_head *current_list=head->prev;
-   int i;
-   for (i=0;i<index;i++)
-   {
-      current_list=current_list->prev;
-   }
-   return current_list;
+    struct list_head *current_list=head->prev;
+    int i;
+    for (i=0;i<index;i++)
+    {
+        current_list=current_list->prev;
+    }
+    return current_list;
 }
 
 void list_test_insert(void)
@@ -144,7 +144,6 @@ void list_test_get(void)
     {
     	ktime_get_real_ts64(&spclock[0]);
         found_head=list_get(i, &HEAD);
-        query_node = *list_entry(found_head, struct node, list);
         ktime_get_real_ts64(&spclock[1]);
         calclock3(spclock, &list_get_time, &list_get_count);
     }
@@ -184,21 +183,21 @@ void list_test_search(void)
 
 int __init simple_module_init(void)
 {
-    printk(KERN_EMERG "list testing Module\n");
-    list_test_insert();
-    list_test_delete();
+    printk(KERN_EMERG "Linux list testing Module\n");
+    //list_test_insert();
+    //list_test_delete();
     list_test_get();
-    list_test_search();
+    //list_test_search();
     return 0;
 }
 
 void __exit simple_module_cleanup(void)
 {
-    printk("list testing Done\n");
-    printk("list INSERT time : %llu, count: %llu\n", list_insert_time, list_insert_count);
-    printk("list DELETE time : %llu, count: %llu\n", list_delete_time, list_delete_count);
-    printk("list GET time (AVG) : %llu ( %llu ), count: %llu\n", list_get_time, list_get_time/NUM_OF_ENTRY, list_get_count);
-    printk("list SEARCH time (AVG) : %llu ( %llu ), count: %llu\n", list_search_time, list_search_time/NUM_OF_ENTRY, list_search_count);
+    printk("Linux list testing Done\n");
+    printk("Linux list INSERT time : %llu, count: %llu\n", list_insert_time, list_insert_count);
+    printk("Linux list DELETE time : %llu, count: %llu\n", list_delete_time, list_delete_count);
+    printk("List GET time : %llu, count: %llu\n", list_get_time,  list_get_count);
+    printk("List SEARCH time : %llu, count: %llu\n", list_search_time, list_search_count);
 }
 
 module_init(simple_module_init);
