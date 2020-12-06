@@ -29,10 +29,11 @@ struct th_info{
 void new_sub_head(struct list_head *head);
 void n_list_add(struct list_head *new, struct list_head *head);
 void n_list_del(struct list_head *entry, struct list_head *head);
-void n_list_del_new(struct list_head *entry, struct list_head *head);
+void n_list_del_stable(struct list_head *entry, struct list_head *head);
 void n_list_traverse(struct list_head *head, int to_find);
 static int _n_list_traverse(void *current_sub_head);
 struct list_head* n_list_get(int index, struct list_head* head);
+struct list_head* n_list_get_stable(int index, struct list_head* head);
 void init_n_list(struct list_head *head);
 
 

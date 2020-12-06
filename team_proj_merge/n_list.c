@@ -50,7 +50,7 @@ void n_list_del(struct list_head *entry, struct list_head *head)
         list_del(&_sub_head->h_list);
 }
 
-void n_list_del_new(struct list_head* entry, struct list_head* head)
+void n_list_del_stable(struct list_head* entry, struct list_head* head)
 {
     struct sub_head* now_sub_head_entry = list_entry(entry, struct node, v_list)->_sub;
     struct list_head* now_sub_head = &(now_sub_head_entry->h_list);
@@ -170,6 +170,25 @@ struct list_head* n_list_get(int index, struct list_head* head)
     for(i=0; i<index-index_sum; i++)
         current_list_head = current_list_head->prev;
     return current_list_head;
+}
+
+struct list_head* n_list_get_stable(int index, struct list_head* head)
+{
+    int h_index = (int)(index/SUB_LENGTH);
+    int v_index = index-(h_index*SUB_LENGTH);
+    printk("h:%d, v:%d\n",h_index, v_index);
+    int i;
+    
+    struct list_head* hp = head->prev;
+    for (i=0; i<h_index; i++)
+        hp = hp->prev;
+    struct list_head* vp = &(list_entry(hp, struct sub_head, h_list)->v_list);
+    for (i=0; i<v_index+1; i++)
+    {
+        printk("this vlist : %d\n", list_entry(vp, struct node, v_list)->value);
+        vp = vp->prev;
+    }
+    return vp;
 }
 
 void init_n_list(struct list_head *head)

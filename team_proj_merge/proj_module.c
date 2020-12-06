@@ -146,7 +146,7 @@ void n_list_test_search(void)
     }
 }
 
-void for_del_testing(void)
+void for_testing(void)
 {
     int i;
     struct list_head HEAD;
@@ -158,9 +158,10 @@ void for_del_testing(void)
         new->value = i;
         n_list_add(&new->v_list, &HEAD);
     }
-    struct list_head* found = n_list_get(23, &HEAD);
+    struct list_head* found = n_list_get_stable(23, &HEAD);
     printk("found value : %d\n", list_entry(found, struct node, v_list)->value);
-    n_list_del_new(found, &HEAD);
+    /* n_list_del test #######################
+    n_list_del_stable(found, &HEAD);
     
     struct list_head* p;
     for (p = (HEAD.prev); p!=&HEAD; p=p->prev)
@@ -174,7 +175,7 @@ void for_del_testing(void)
             struct node* entry = list_entry(pv, struct node, v_list);
             printk("  val : %d\n", entry->value);
         }
-    }
+    }*/
 }
 
 int __init proj_module_init(void)
@@ -184,7 +185,7 @@ int __init proj_module_init(void)
     //n_list_test_delete();
     //n_list_test_get();
     //n_list_test_search();
-    for_del_testing();
+    for_testing();
     return 0;
 }
 
