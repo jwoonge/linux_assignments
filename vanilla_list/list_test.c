@@ -72,6 +72,7 @@ struct list_head* list_get(int index, struct list_head* head)
     for (i=0;i<index;i++)
     {
         current_list=current_list->prev;
+        //struct node* entry = list_entry(current_list, struct node, list);//
     }
     return current_list;
 }
@@ -184,10 +185,10 @@ void list_test_search(void)
 int __init simple_module_init(void)
 {
     printk(KERN_EMERG "Linux list testing Module\n");
-    //list_test_insert();
-    //list_test_delete();
+    list_test_insert();
+    list_test_delete();
     list_test_get();
-    //list_test_search();
+    list_test_search();
     return 0;
 }
 

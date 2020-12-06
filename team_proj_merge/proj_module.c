@@ -1,5 +1,5 @@
 #define BILLION 1000000000
-#define NUM_OF_ENTRY 100000
+#define NUM_OF_ENTRY 100
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -196,7 +196,7 @@ void n_list_test_search(void)
     }
 }
 
-void for_testing(void)
+void time_complexity_testing(void)
 {
     int i;
     struct list_head HEAD;
@@ -208,38 +208,75 @@ void for_testing(void)
         new->value = i;
         n_list_add(&new->v_list, &HEAD);
     }
-    struct list_head* found = n_list_get(23, &HEAD);
-    //struct list_head* found = n_list_get_stable(23, &HEAD);
-    printk("found value : %d\n", list_entry(found, struct node, v_list)->value);
-    /* n_list_del test #######################
-    n_list_del_stable(found, &HEAD);
     
-    struct list_head* p;
-    for (p = (HEAD.prev); p!=&HEAD; p=p->prev)
+    struct list_head* p = HEAD.next;
+    for (i=0; i<100000; i++)
     {
-        struct sub_head* sub_entry = list_entry(p, struct sub_head, h_list);
-        printk("len v list:%d\n", sub_entry->len);
-        
-        struct list_head* pv = &(sub_entry->v_list);
-        for (pv = (sub_entry->v_list).prev; pv!=&(sub_entry->v_list); pv=pv->prev)
-        {
-            struct node* entry = list_entry(pv, struct node, v_list);
-            printk("  val : %d\n", entry->value);
-        }
-    }*/
+        ktime_get_real_ts64(&spclock[0]);
+        struct sub_head* sh_entry = list_entry(p, struct sub_head, h_list);
+        if (sh_entry==NULL) printk("NULL1\n");
+        ktime_get_real_ts64(&spclock[1]);
+        calclock3(spclock, &n_list_insert_time, &n_list_insert_count);
+    }
+    struct list_head* pp = list_entry(p, struct sub_head, h_list)->v_list.next;
+    for (i=0; i<100000; i++)
+    {
+        ktime_get_real_ts64(&spclock[0]);
+        struct node* n_entry = list_entry(pp, struct node, v_list);
+        if (n_entry==NULL) printk("NULL2\n");
+        ktime_get_real_ts64(&spclock[1]);
+        calclock3(spclock, &n_list_delete_time, &n_list_delete_count);
+    }
+    
+    struct list_head HEAD2;
+    init_n_list(&HEAD2);    
+    
+    for (i=0; i<NUM_OF_ENTRY; i++)
+    {
+        struct node *new = kmalloc(sizeof(struct node), GFP_KERNEL);
+        new->value = i;
+        list_add(&new->v_list, &HEAD2);
+    }
+    struct list_head* ppp = HEAD2.next;
+    for (i=0; i<100000; i++)
+    {
+        ktime_get_real_ts64(&spclock[0]);
+        struct node* sh_entry = list_entry(ppp, struct node, v_list);
+        if (sh_entry==NULL) printk("NULL3\n");
+        ktime_get_real_ts64(&spclock[1]);
+        calclock3(spclock, &n_list_get_time, &n_list_get_count);
+    }
+}
+void traverse_coding_testing(void)
+{
+    int i;
+    struct list_head HEAD;
+    init_n_list(&HEAD);    
+    
+    for (i=0; i<NUM_OF_ENTRY; i++)
+    {
+        struct node *new = kmalloc(sizeof(struct node), GFP_KERNEL);
+        new->value = i;
+        n_list_add(&new->v_list, &HEAD);
+    }
+    
+    n_list_traverse(&HEAD, 32);
 }
 
 int __init proj_module_init(void)
 {
     printk(KERN_EMERG "Multi-head list testing Module\n");
-    
+    /*
     n_list_test_insert();
     n_list_test_delete();
     n_list_test_delete_stable();
     n_list_test_get();
-    
     n_list_test_get_stable();
     //n_list_test_search();
+    */
+    //time_complexity_testing();
+    traverse_coding_testing();
+    
     return 0;
 }
 

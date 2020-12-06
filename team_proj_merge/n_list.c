@@ -1,5 +1,5 @@
 #define SUB_LENGTH 10
-#define NUM_OF_ENTRY 1000
+#define NUM_THREAD 4
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -14,8 +14,60 @@ struct rw_semaphore counter_rwse;
 //struct mutex my_mutex;
 unsigned long long count = 0;
 
-struct list_head thread_list_head;
+struct list_head* task_list;
 
+void n_list_traverse(struct list_head* head, int _to_find)
+{
+    task_list = kmalloc(NUM_THREAD * sizeof(struct list_head), GFP_KERNEL);
+    int i, thread_i=0;
+    for (i=0; i<NUM_THREAD; i++)
+        INIT_LIST_HEAD(&task_list[i]);
+        
+    struct list_head* p;
+    struct sub_head* todo_sub_head;
+    for (p=head->prev; p!=head; p=p->prev)
+    {
+        todo_sub_head = list_entry(p, struct sub_head, h_list);
+        struct task* new_task = kmalloc(sizeof(struct task), GFP_KERNEL);
+        new_task->todo = todo_sub_head;
+        
+        list_add(&new_task->t_list, &(task_list[thread_i]));
+        
+        thread_i ++;
+        if (thread_i==NUM_THREAD) thread_i = 0;
+    }
+    
+    //////////////////////////
+    for (i=0; i<NUM_THREAD; i++)
+    {
+        struct thread_arg* arg = kmalloc(sizeof(struct thread_arg*), GFP_KERNEL);
+        arg-> to_find = _to_find;
+        arg-> tasks = &task_list[i];
+    
+        kthread_run(_n_list_traverse, (void*) arg, "TRAVERSE");
+    }
+}
+
+static int _n_list_traverse(void *_arg)
+{
+    struct thread_arg* arg = (struct thread_arg*)_arg;
+    int to_find = arg->to_find;
+    struct list_head* task_head = arg->tasks;
+
+    struct list_head* tp;
+    struct list_head* v_head;
+    for (tp=task_head->prev; tp!=task_head; tp=tp->prev)
+    {
+        v_head = &list_entry(tp, struct task, t_list)->todo->v_list;
+        struct list_head* vp;
+        for (vp = v_head->prev; vp!=v_head; vp=vp->prev)
+        {
+            struct node* traversed = list_entry(vp, struct node, v_list);
+            printk("traverse %d\n", traversed->value);
+        }
+    }   
+}
+    
 void new_sub_head(struct list_head *head)
 {
     struct sub_head *new = kmalloc(sizeof(struct sub_head), GFP_KERNEL);
@@ -81,73 +133,6 @@ void n_list_del_stable(struct list_head* entry, struct list_head* head)
         list_del(&now_sub_head_entry->h_list);
 }
 
-void n_list_traverse(struct list_head* head, int to_find)
-{
-    INIT_LIST_HEAD(&thread_list_head);
-    struct sub_head *current_sub_head;
-    struct list_head *hp;
-    int thread_counter=0;
-    
-    list_for_each(hp, head)
-    { 
-        struct th_info *t_info = kmalloc(sizeof(struct th_info*), GFP_KERNEL);
-        current_sub_head = list_entry(hp, struct sub_head, h_list);
-        // struct sub_head* arg = kmalloc(sizeof(struct sub_head*), GFP_KERNEL);
-        struct thread_arg *arg = kmalloc(sizeof(struct thread_arg*), GFP_KERNEL);
-        arg->s = current_sub_head;
-        arg->to_find = to_find;
-        arg->thread_number = thread_counter;
-        thread_counter++;
-        
-        t_info->g_th_id = kthread_run(_n_list_traverse, (void*)arg, "TRAVERSE");
-        list_add(&t_info->list, &thread_list_head);
-    }
-}
-
-static int _n_list_traverse(void *thread_arg)
-{
-    struct sub_head *_current_sub_head = ((struct thread_arg*)thread_arg)->s;
-    int to_find = ((struct thread_arg*)thread_arg)->to_find;
-    int thread_number = ((struct thread_arg*)thread_arg)->thread_number;
-    struct node *current_node;
-    struct list_head *p;
-    int isFound = 0, i;
-        
-    list_for_each(p, &_current_sub_head->v_list)
-    {
-        down_read(&counter_rwse);
-        current_node = list_entry(p, struct node, v_list);
-        // printk("%d\n", current_node->value);
-        
-        if(current_node->value == to_find)
-        {
-            isFound = 1;
-            up_read(&counter_rwse);
-            break;
-        }
-        up_read(&counter_rwse);
-    }
-    
-    if(isFound)
-    {
-        // All thread stop
-        
-        printk("FIND ; %d\n", to_find);
-        struct list_head *p;
-        struct list_head * new_head = &thread_list_head;
-        
-        for(i=0; i<thread_number; i++)
-        {
-            new_head = new_head->next;
-        }
-        new_head = new_head->next;
-        
-        list_for_each(p, new_head)
-        {
-            kthread_stop(list_entry(p, struct th_info, list)->g_th_id);
-        }
-    }
-}
 
 struct list_head* n_list_get(int index, struct list_head* head)
 {
