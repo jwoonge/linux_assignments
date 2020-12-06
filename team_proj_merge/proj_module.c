@@ -158,7 +158,8 @@ void for_testing(void)
         new->value = i;
         n_list_add(&new->v_list, &HEAD);
     }
-    struct list_head* found = n_list_get_stable(23, &HEAD);
+    struct list_head* found = n_list_get(23, &HEAD);
+    //struct list_head* found = n_list_get_stable(23, &HEAD);
     printk("found value : %d\n", list_entry(found, struct node, v_list)->value);
     /* n_list_del test #######################
     n_list_del_stable(found, &HEAD);
