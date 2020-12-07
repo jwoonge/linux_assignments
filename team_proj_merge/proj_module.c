@@ -188,9 +188,11 @@ void n_list_test_search(void)
         n_list_add(&new->v_list, &HEAD);
     }
     
-    for(i=0; i<1; i++){
-        ktime_get_real_ts64(&spclock[0]);
-        n_list_traverse(&HEAD, 50000, &spclock[1]);
+    for(i=0; i<NUM_OF_ENTRY; i++){
+        //ktime_get_real_ts64(&spclock[0]);
+        n_list_traverse(&HEAD, i, spclock, &n_list_search_time, &n_list_search_count);
+        //ktime_get_real_ts64(&spclock[1]);
+        //calclock3(spclock, &n_list_search_time, &n_list_search_count);
     }
 }
 
@@ -245,21 +247,6 @@ void time_complexity_testing(void)
         calclock3(spclock, &n_list_get_time, &n_list_get_count);
     }
 }
-void traverse_coding_testing(void)
-{
-    int i;
-    struct list_head HEAD;
-    init_n_list(&HEAD);    
-    
-    for (i=0; i<NUM_OF_ENTRY; i++)
-    {
-        struct node *new = kmalloc(sizeof(struct node), GFP_KERNEL);
-        new->value = i;
-        n_list_add(&new->v_list, &HEAD);
-    }
-    
-    //n_list_traverse(&HEAD, 32, );
-}
 
 int __init proj_module_init(void)
 {
@@ -273,14 +260,13 @@ int __init proj_module_init(void)
     
     n_list_test_search();
     //time_complexity_testing();
-    //traverse_coding_testing();
     
     return 0;
 }
 
 void __exit proj_module_cleanup(void)
 {
-    calclock3(spclock, &n_list_search_time, &n_list_search_count);
+    //calclock3(spclock, &n_list_search_time, &n_list_search_count);
     printk("Multi-head list testing Done\n");
     printk("Multi-head list INSERT time : %llu, count: %llu\n", n_list_insert_time, n_list_insert_count);
     printk("Multi-head list DELETE time : %llu, count: %llu\n", n_list_delete_time, n_list_delete_count);
