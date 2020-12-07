@@ -1,5 +1,5 @@
 #define BILLION 1000000000
-#define NUM_OF_ENTRY 100
+#define NUM_OF_ENTRY 100000
 
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -188,9 +188,9 @@ void n_list_test_search(void)
         n_list_add(&new->v_list, &HEAD);
     }
     
-    for(i=0; i<2; i++){
+    for(i=0; i<1; i++){
         ktime_get_real_ts64(&spclock[0]);
-        n_list_traverse(&HEAD, i);
+        n_list_traverse(&HEAD, 50000);
         ktime_get_real_ts64(&spclock[1]);
         calclock3(spclock, &n_list_search_time, &n_list_search_count);
     }
@@ -266,16 +266,16 @@ void traverse_coding_testing(void)
 int __init proj_module_init(void)
 {
     printk(KERN_EMERG "Multi-head list testing Module\n");
-    /*
-    n_list_test_insert();
-    n_list_test_delete();
-    n_list_test_delete_stable();
-    n_list_test_get();
+    
+    //n_list_test_insert();
+    //n_list_test_delete();
+    //n_list_test_delete_stable();
+    //n_list_test_get();
     n_list_test_get_stable();
+    
     //n_list_test_search();
-    */
     //time_complexity_testing();
-    traverse_coding_testing();
+    //traverse_coding_testing();
     
     return 0;
 }

@@ -72,7 +72,6 @@ struct list_head* list_get(int index, struct list_head* head)
     for (i=0;i<index;i++)
     {
         current_list=current_list->prev;
-        //struct node* entry = list_entry(current_list, struct node, list);//
     }
     return current_list;
 }

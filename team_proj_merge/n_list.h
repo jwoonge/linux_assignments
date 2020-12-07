@@ -2,7 +2,7 @@
 #define __N_LIST_H
 
 #include <linux/list.h>
-
+#include <linux/completion.h>
 
 struct sub_head{
     struct list_head h_list;
@@ -26,7 +26,8 @@ struct task{
 struct thread_arg{
     struct list_head* tasks;
     int to_find;
-    //int thread_number;
+    int thread_number;
+    struct completion* comp;
 };
 
 
