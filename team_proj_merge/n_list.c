@@ -18,7 +18,7 @@ struct list_head* task_list;
 //struct completion thread_comp;
 DECLARE_COMPLETION(thread_comp);
 
-void n_list_traverse(struct list_head* head, int _to_find)
+void n_list_traverse(struct list_head* head, int _to_find, struct timespec64* _spclock)
 {
     task_list = kmalloc(NUM_THREAD * sizeof(struct list_head), GFP_KERNEL);
     int i, thread_i=0;
@@ -50,10 +50,11 @@ void n_list_traverse(struct list_head* head, int _to_find)
         arg-> tasks = &task_list[i];
         arg-> thread_number = i;
         arg-> comp = &thread_comp;
+        arg-> spclock = _spclock;
         
         thread_ids[i] = (struct task_struct*) kthread_run(_n_list_traverse, (void*) arg, "TRAVERSE");
     }
-    wait_for_completion(&thread_comp);
+    //wait_for_completion(&thread_comp);
 }
 
 static int _n_list_traverse(void *_arg)
@@ -64,6 +65,7 @@ static int _n_list_traverse(void *_arg)
     struct completion* c = arg->comp;
     int i;
     struct list_head* task_head = arg->tasks;
+    struct timespec64* spclock1 = arg->spclock;
 
     struct list_head* tp;
     struct list_head* v_head;
@@ -82,11 +84,12 @@ static int _n_list_traverse(void *_arg)
             
             if (traversed->value == to_find)
             {
+                ktime_get_real_ts64(spclock1);
                 printk("FOUND!!!!!");
                 for (i=0; i<NUM_THREAD; i++)
                     if (i!=this_thread_num)
                         kthread_stop(thread_ids[i]);
-                complete_all(c);
+                //complete_all(c);
                 return 0;
             }
         }

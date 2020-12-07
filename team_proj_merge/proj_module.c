@@ -190,9 +190,7 @@ void n_list_test_search(void)
     
     for(i=0; i<1; i++){
         ktime_get_real_ts64(&spclock[0]);
-        n_list_traverse(&HEAD, 50000);
-        ktime_get_real_ts64(&spclock[1]);
-        calclock3(spclock, &n_list_search_time, &n_list_search_count);
+        n_list_traverse(&HEAD, 50000, &spclock[1]);
     }
 }
 
@@ -260,7 +258,7 @@ void traverse_coding_testing(void)
         n_list_add(&new->v_list, &HEAD);
     }
     
-    n_list_traverse(&HEAD, 32);
+    //n_list_traverse(&HEAD, 32, );
 }
 
 int __init proj_module_init(void)
@@ -271,9 +269,9 @@ int __init proj_module_init(void)
     //n_list_test_delete();
     //n_list_test_delete_stable();
     //n_list_test_get();
-    n_list_test_get_stable();
+    //n_list_test_get_stable();
     
-    //n_list_test_search();
+    n_list_test_search();
     //time_complexity_testing();
     //traverse_coding_testing();
     
@@ -282,6 +280,7 @@ int __init proj_module_init(void)
 
 void __exit proj_module_cleanup(void)
 {
+    calclock3(spclock, &n_list_search_time, &n_list_search_count);
     printk("Multi-head list testing Done\n");
     printk("Multi-head list INSERT time : %llu, count: %llu\n", n_list_insert_time, n_list_insert_count);
     printk("Multi-head list DELETE time : %llu, count: %llu\n", n_list_delete_time, n_list_delete_count);
