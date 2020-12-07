@@ -33,8 +33,6 @@ struct task{
 struct thread_arg{
     struct list_head* tasks;
     int to_find;
-    int thread_number;
-    struct completion* comp;
     struct timespec64* spclock;
     unsigned long long* time;
     unsigned long long* count;

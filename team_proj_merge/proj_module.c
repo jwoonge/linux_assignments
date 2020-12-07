@@ -178,7 +178,7 @@ void list_test_search(void)
     // SEARCH
     struct origin_node *current_node;
     struct list_head *p;
-    
+    /*
     for(i=0; i<NUM_OF_ENTRY; i+=99999){
         ktime_get_real_ts64(&spclock[0]);
         list_for_each(p, &HEAD)
@@ -189,7 +189,16 @@ void list_test_search(void)
         }
         ktime_get_real_ts64(&spclock[1]);
         calclock3(spclock, &list_search_time, &list_search_count);
+    }*/
+    ktime_get_real_ts64(&spclock[0]);
+    list_for_each(p, &HEAD)
+    {
+        current_node=list_entry(p, struct origin_node, list);
+        if(current_node->value == 49999)
+            break;
     }
+    ktime_get_real_ts64(&spclock[1]);
+    calclock3(spclock, &list_search_time, &list_search_count);
 }
 
 ///////////////////////// n_list testing function //////////////////////
@@ -316,10 +325,8 @@ void n_list_test_search(void)
         n_list_add(&new->v_list, &HEAD);
     }
     
-    
-    n_list_traverse(&HEAD, 0, spclock, &n_list_search_time, &n_list_search_count);
-    n_list_traverse(&HEAD, 99999, spclock, &n_list_search_time, &n_list_search_count);
-    
+    n_list_traverse(&HEAD, 49999, spclock, &n_list_search_time, &n_list_search_count);
+  
 }
 
 int __init proj_module_init(void)

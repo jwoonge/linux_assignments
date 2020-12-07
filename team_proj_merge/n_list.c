@@ -37,9 +37,6 @@ int stop_key = 0;
 spinlock_t stop_key_lock;
 struct list_head* task_list;
 
-//DECLARE_COMPLETION(thread_comp);
-
-
 void n_list_traverse(struct list_head *head, int _to_find, struct timespec64* _spclock, unsigned long long* _time, unsigned long long* _count)
 {
     ktime_get_real_ts64(&_spclock[0]);
@@ -73,7 +70,6 @@ void n_list_traverse(struct list_head *head, int _to_find, struct timespec64* _s
         struct thread_arg* arg = kmalloc(sizeof(struct thread_arg*), GFP_KERNEL);
         arg-> to_find = _to_find;
         arg-> tasks = &task_list[i];
-        arg-> thread_number = i;
         arg-> time = _time;
         arg-> count = _count;
         arg-> spclock = _spclock;
@@ -94,24 +90,18 @@ static int _n_list_traverse(void *_arg)
 {
     struct thread_arg* arg = (struct thread_arg*)_arg;
     int to_find = arg->to_find;
-    int this_thread_num = arg->thread_number;
-
     int i;
     struct list_head* task_head = arg->tasks;
     struct timespec64* spclock = arg->spclock;
-
     struct list_head* tp;
     struct list_head* v_head;
-    for (tp=task_head->prev; tp!=task_head; tp=tp->prev)
-    {
+    for (tp=task_head->prev; tp!=task_head; tp=tp->prev){
         v_head = &list_entry(tp, struct task, t_list)->todo->v_list;
         struct list_head* vp;
-        for (vp = v_head->prev; vp!=v_head; vp=vp->prev)
-        {
+        for (vp = v_head->prev; vp!=v_head; vp=vp->prev){
             struct node* traversed = list_entry(vp, struct node, v_list);
             
-            if (traversed->value == to_find)
-            {
+            if (traversed->value == to_find){
                 spin_lock(&stop_key_lock);
                 stop_key += 1;
                 
@@ -146,13 +136,9 @@ void n_list_add(struct list_head *new, struct list_head *head)
         new_sub_head(head);
         
     struct sub_head *tmp = list_entry(head->next, struct sub_head, h_list);
-    //printk("%d\n", tmp->len);
-    
     list_add(new, &tmp->v_list);
     
     list_entry(head->next, struct sub_head, h_list)->len++;
-    
-    // TODO : sturct node
     list_entry(new, struct node, v_list)->_sub = list_entry(head->next, struct sub_head, h_list); 
 }
 
@@ -235,17 +221,14 @@ struct list_head* n_list_get_stable(int index, struct list_head* head)
     struct list_head* vp = &(list_entry(hp, struct sub_head, h_list)->v_list);
     for (i=0; i<v_index+1; i++)
         vp = vp->prev;
-    return vp;
     
-    /*
     struct list_head *current_list=head->prev;
-    int i;
+
     for (i=0;i<index;i++)
     {
         current_list=current_list->prev;
     }
     return current_list;
-    */
 }
 
 void init_n_list(struct list_head *head)
