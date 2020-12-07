@@ -116,7 +116,6 @@ void list_test_delete(void)
         ktime_get_real_ts64(&spclock[1]);
         calclock3(spclock, &list_delete_time, &list_delete_count);
     }    
-
 }
 
 void list_test_get(void)

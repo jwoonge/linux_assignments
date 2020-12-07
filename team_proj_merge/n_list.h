@@ -17,6 +17,12 @@ struct node{
    int value;
 };
 
+struct origin_node
+{
+    struct list_head list;
+    int value;
+};
+
 
 struct task{
     struct list_head t_list;
