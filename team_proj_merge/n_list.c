@@ -34,9 +34,7 @@ unsigned long long calclock4(struct timespec64* spclock, unsigned long long* tot
 
 struct task_struct** thread_ids;
 int stop_key = 0;
-int stop_count = 0;
 spinlock_t stop_key_lock;
-spinlock_t stop_count_lock;
 struct list_head* task_list;
 
 //DECLARE_COMPLETION(thread_comp);
@@ -78,16 +76,14 @@ void n_list_traverse(struct list_head *head, int _to_find, struct timespec64* _s
         arg-> thread_number = i;
         arg-> time = _time;
         arg-> count = _count;
-        //arg-> comp = &thread_comp;
         arg-> spclock = _spclock;
         
         thread_ids[i] = (struct task_struct*) kthread_run(_n_list_traverse, (void*) arg, "TRAVERSE");
     }
-    while (stop_key==0)
+    while (stop_key<NUM_THREAD)
     {
         msleep(1);
     }
-    printk("traverse Done\n");
     kfree(task_list);
     kfree(thread_ids);
     
@@ -99,7 +95,7 @@ static int _n_list_traverse(void *_arg)
     struct thread_arg* arg = (struct thread_arg*)_arg;
     int to_find = arg->to_find;
     int this_thread_num = arg->thread_number;
-    //struct completion* c = arg->comp;
+
     int i;
     struct list_head* task_head = arg->tasks;
     struct timespec64* spclock = arg->spclock;
@@ -108,14 +104,6 @@ static int _n_list_traverse(void *_arg)
     struct list_head* v_head;
     for (tp=task_head->prev; tp!=task_head; tp=tp->prev)
     {
-        spin_lock(&stop_key_lock);
-        if (spin_lock == 1 || kthread_should_stop())
-        {
-            spin_unlock(&stop_key_lock);
-            printk("thread terminated.\n");
-            break;
-        }
-        spin_unlock(&stop_key_lock);
         v_head = &list_entry(tp, struct task, t_list)->todo->v_list;
         struct list_head* vp;
         for (vp = v_head->prev; vp!=v_head; vp=vp->prev)
@@ -125,28 +113,22 @@ static int _n_list_traverse(void *_arg)
             if (traversed->value == to_find)
             {
                 spin_lock(&stop_key_lock);
-                stop_key = 1;
-                
+                stop_key += 1;
                 
                 ktime_get_real_ts64(&spclock[1]);
                 calclock4(spclock, arg->time, arg->count);
-                printk("FOUND!!!!!");
-                for (i=0; i<NUM_THREAD; i++)
-                    if (i!=this_thread_num)
-                        kthread_stop(thread_ids[i]);
-                //complete_all(c);
-                //do_exit(0);
+                
                 spin_unlock(&stop_key_lock);
                 kfree(_arg);
                 return 0;
             }
         }
+        
     }
+    spin_lock(&stop_key_lock);
+    stop_key += 1;
+    spin_unlock(&stop_key_lock);
     kfree(_arg);
-    //spin_lock(&stop_count_lock);
-    //stop_count ++;
-    //spin_unlock(&stop_count_lock);
-    //do_exit(0);
     return 0;  
 }
     

@@ -188,11 +188,8 @@ void n_list_test_search(void)
         n_list_add(&new->v_list, &HEAD);
     }
     
-    for(i=0; i<NUM_OF_ENTRY; i++){
-        //ktime_get_real_ts64(&spclock[0]);
+    for(i=0; i<10000; i++){
         n_list_traverse(&HEAD, i, spclock, &n_list_search_time, &n_list_search_count);
-        //ktime_get_real_ts64(&spclock[1]);
-        //calclock3(spclock, &n_list_search_time, &n_list_search_count);
     }
 }
 
@@ -210,7 +207,7 @@ void time_complexity_testing(void)
     }
     
     struct list_head* p = HEAD.next;
-    for (i=0; i<100000; i++)
+    for (i=0; i<NUM_OF_ENTRY; i++)
     {
         ktime_get_real_ts64(&spclock[0]);
         struct sub_head* sh_entry = list_entry(p, struct sub_head, h_list);
@@ -219,7 +216,7 @@ void time_complexity_testing(void)
         calclock3(spclock, &n_list_insert_time, &n_list_insert_count);
     }
     struct list_head* pp = list_entry(p, struct sub_head, h_list)->v_list.next;
-    for (i=0; i<100000; i++)
+    for (i=0; i<NUM_OF_ENTRY; i++)
     {
         ktime_get_real_ts64(&spclock[0]);
         struct node* n_entry = list_entry(pp, struct node, v_list);
@@ -238,7 +235,7 @@ void time_complexity_testing(void)
         list_add(&new->v_list, &HEAD2);
     }
     struct list_head* ppp = HEAD2.next;
-    for (i=0; i<100000; i++)
+    for (i=0; i<NUM_OF_ENTRY; i++)
     {
         ktime_get_real_ts64(&spclock[0]);
         struct node* sh_entry = list_entry(ppp, struct node, v_list);
